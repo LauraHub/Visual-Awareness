@@ -1,0 +1,682 @@
+function LL_visual1510 = LL_visual1510(id,condition,lumin)
+
+%% LUNGU visual awareness task (synaesthesia)
+
+%% INPUTS
+% id = id number
+% condition = 1 (grapheme-grapheme), 2 (grapheme, photism), 3 (colour)
+% lumin = 0 (no luminance test), 1 (luminance test)
+% % EXAMPLE:
+% LL_visual('01',1,1) [id 1, grapheme-grapheme, luminance test]
+
+%task=1;
+
+%% STIMULUS PARAMETERS
+% syn1
+stim.graphs=[2 3 5 9];
+stim.cols=[0 232 156; 145 123 132; 230 230 230; 156 132 45];
+% syn2 sca
+
+% ...
+
+%% ADD PATH FOR PALAMEDES
+addpath('C:\PALAMEDES\palamedes1_10_0\Palamedes')
+%addpath('C:\Ryan\palamedes1_9_1\Palamedes')
+%addpath /Users/mauskopf/matlab/palamedes1_5_0/Palamedes
+%addpath('C:\Melania\palamedes1_8_2\Palamedes')
+%addpath /Users/melaniaparzonka/Desktop/DISSERTATION/data/palamedes1_8_2/Palamedes
+
+%% SCREEN
+Screen('Preference', 'SkipSyncTests', 1); 
+screens=Screen('Screens');
+screenNumber=max(screens);
+gray=GrayIndex(screenNumber);
+[w, wRect]=Screen('OpenWindow',screenNumber, gray);
+[width, height]=Screen('WindowSize', w);
+% inter-flip interval
+ifi = Screen('GetFlipInterval', w);
+
+% Hide the mouse cursor:
+%HideCursor;
+
+%% SCREEN SETTINGS
+settings.w.res = [0 0 width height];
+settings.w.x.half = width/2;
+settings.w.x.quarter = ceil(settings.w.x.half/2);
+settings.w.y.half = height/2;
+settings.w.y.quarter = ceil(settings.w.y.half/2);
+settings.scale.qs.pos.x=settings.w.x.half-210; 
+settings.scale.penwdt        = 4;
+% stimulus dimensions & position
+stim.dimensions=90;
+stim.pos=[width/2-stim.dimensions/2 height/2-stim.dimensions/2 width/2+stim.dimensions/2 height/2+stim.dimensions/2];
+fix.dimensions=15;
+fix.pos=[width/2-fix.dimensions/2 height/2-fix.dimensions/2 width/2+fix.dimensions/2 height/2+fix.dimensions/2];
+
+%% SCALE, LABEL, & LINE SETTINGS
+settings.scale.pos = [0 settings.w.y.half + settings.w.y.quarter settings.w.x.half settings.w.y.half + settings.w.y.quarter];
+settings.scale.cursor        = 'Arrow';
+settings.scale.labels.sx     = [settings.w.x.quarter-70 (width*.75)-55]; 
+settings.scale.labels.wdt    = 0;
+settings.scale.labels.hgt    = 100;
+settings.scale.labels.pos(1,:) = [0 settings.scale.pos(2) - ceil(settings.scale.labels.hgt/2) 0 settings.scale.pos(2) - ceil(settings.scale.labels.hgt/2)+settings.scale.labels.hgt];
+settings.scale.labels.pos(2,:) = [settings.scale.pos(3) settings.scale.pos(2) - ceil(settings.scale.labels.hgt/2) settings.scale.pos(3)+settings.scale.labels.wdt settings.scale.pos(2) - ceil(settings.scale.labels.hgt/2)+settings.scale.labels.hgt];
+settings.scale.lines.pos.x = [((settings.w.res(3) - settings.w.x.half)/2):(settings.w.x.half/4):(settings.w.x.half+((settings.w.res(3) - settings.w.x.half)/2))];
+settings.scale.lines.pos.y=[(settings.w.y.half+settings.w.res(4)*.1)-10 (settings.w.y.half+settings.w.res(4)*.1)+10];
+
+settings.box1.pos = [settings.w.x.half-150 settings.w.y.half-50 settings.w.x.half-50 settings.w.y.half+50];
+settings.box2.pos = [settings.w.x.half+50 settings.w.y.half-50 settings.w.x.half+150 settings.w.y.half+50];
+settings.box3.pos = [settings.box1.pos(1) settings.box1.pos(2)-100 settings.box1.pos(3) settings.box1.pos(2)];
+settings.box4.pos = [settings.box1.pos(1) settings.box1.pos(4) settings.box1.pos(3) settings.box1.pos(4)+100];
+settings.box5.pos = [settings.box2.pos(1) settings.box2.pos(2)-100 settings.box2.pos(3) settings.box2.pos(2)];
+settings.box6.pos = [settings.box2.pos(1) settings.box2.pos(4) settings.box2.pos(3) settings.box2.pos(4)+100];
+
+center_correction=8;
+
+settings.scale.confidence.pos=[settings.w.x.half-100-center_correction settings.w.y.half-100+center_correction; ...
+    settings.w.x.half+100-center_correction settings.w.y.half-100+center_correction; ...
+    settings.w.x.half+100-center_correction settings.w.y.half+100+center_correction; ...
+    settings.w.x.half-100-center_correction settings.w.y.half+100+center_correction];
+
+%% GRAPHEME DIMENSIONS & POSITION
+% stimulus dimensions & position
+stim.dimensions=150;
+stim.pos=[width/2-stim.dimensions/2 height/2-stim.dimensions/2 width/2+stim.dimensions/2 height/2+stim.dimensions/2];
+% fix dimensions & position
+fix.dimensions=15;
+fix.pos=[width/2-fix.dimensions/2 height/2-fix.dimensions/2 width/2+fix.dimensions/2 height/2+fix.dimensions/2];
+
+%% COLOUR DIMENSIONS & POSITION
+                [xCenter, yCenter] = RectCenter(wRect);
+                baseRect = [0 0 100 100];
+                maxDiameter = max(baseRect) * 1.01;
+                centeredRect = CenterRectOnPointd(baseRect, xCenter, yCenter);
+
+%% SCALE, LABEL, & LINE SETTINGS
+settings.scale.pos = [0 settings.w.y.half + settings.w.y.quarter settings.w.x.half settings.w.y.half + settings.w.y.quarter];
+settings.scale.cursor        = 'Arrow';
+settings.scale.mainlabel.sy = settings.w.y.quarter;
+%settings.scale.labels.sx     = [settings.w.x.quarter-60 (width*.75)-50]; 
+settings.scale.labels.sx     = [(width*(3/8))-60 (width*(5/8))-50];
+settings.scale.labels.wdt    = 0;
+settings.scale.labels.hgt    = 100;
+settings.scale.labels.pos(1,:) = [0 settings.scale.pos(2) - ceil(settings.scale.labels.hgt/2) 0 settings.scale.pos(2) - ceil(settings.scale.labels.hgt/2)+settings.scale.labels.hgt];
+settings.scale.labels.pos(2,:) = [settings.scale.pos(3) settings.scale.pos(2) - ceil(settings.scale.labels.hgt/2) settings.scale.pos(3)+settings.scale.labels.wdt settings.scale.pos(2) - ceil(settings.scale.labels.hgt/2)+settings.scale.labels.hgt];
+%settings.scale.lines.pos.x = [((settings.w.res(3) - settings.w.x.half)/1.5):(settings.w.x.half/4):(settings.w.x.half+((settings.w.res(3) - settings.w.x.half)/1.5))];
+settings.scale.lines.pos.x= (width*(3/8)):(width*(2/8))/4:(width*(5/8));
+settings.scale.lines.pos.y=[(settings.w.y.half+settings.w.res(4)*.05)-10 (settings.w.y.half+settings.w.res(4)*.05)+10];
+
+%% MOUSE POSITION
+mouse.position.x=settings.w.x.half;
+mouse.position.y=settings.w.y.half;
+%mouse.position.y=settings.w.y.half+(settings.w.y.half/2);
+%mouse.position.y=(settings.w.y.half+settings.w.res(4)*.05)+25;
+
+%% PRIORITY
+priorityLevel=MaxPriority(w);
+Priority(priorityLevel);
+
+%% ISI DURATIONS
+isi1.duration=[0.9 1.1]'; %isi1.duration=[1.5 1.6 1.7]';
+isi2.duration=1;
+
+%% MASK DURATION
+mask.duration=.25;
+
+%% NUMBER OF TRIALS & BLOCKS
+prac.num=10;      % for experiments, it should be 30
+thresh.num=50;    % for experiments, it should be 50
+block.num=3;     % for experiments, it should be 6 (Melania) or 7 (Ethar)
+trial.num=96;     % for experiments, it shoudl be 96
+
+%% RESPONSE VECTORS
+pjvector=[1; 2];
+sjvector=[1; 2; 3; 4];
+fixation='+';
+
+%% TIME & DATE STAMP (for output file)
+timeday.stamp=datestr(clock);
+time.stamp=str2num([timeday.stamp(end-7:end-6) timeday.stamp(end-4:end-3) timeday.stamp(end-1:end)]);
+day.stamp=datenum(date);
+
+%% ????
+trialsperblock=12;
+
+%% GABOR PARAMETERS 
+% original
+%rectsize=128;
+% NEW
+rectsize=113;
+
+%% MASK PARAMETERS
+objRect = SetRect(0,0, rectsize, rectsize);
+noiseimg=(50*randn(rectsize, rectsize) + rectsize);
+masktex=Screen('MakeTexture', w, noiseimg);
+
+% % PROBABLY NOT NECESSARY (only needed if noise stimulus changes
+% scale=1;
+% dstRect = ArrangeRects(1, objRect, wRect);
+% %for i=1:numRects
+%     % Compute center position [xc,yc] of the i'th rectangle:
+%     [xc, yc] = RectCenter(dstRect(1,:));
+%     % Create a new rectange, centered at the same position, but 'scale'
+%     % times the size of our pixel noise matrix 'objRect':
+%     dstRect(1,:)=CenterRectOnPoint(objRect * scale, xc, yc);
+% %end
+
+%% STIMULUS MATRICES
+% 1-isi, 2-frames, 3=grapheme, 4-6=RGB
+stim.frames=[NaN 1:1:7]';
+
+stim.smallmat=[[repmat(stim.frames,[size(isi1.duration,1)*2 1])] ... 
+    [repmat([stim.graphs(1,1) stim.cols(1,:)],[size(stim.frames,1) 1]); ...
+    repmat([stim.graphs(1,2) stim.cols(2,:)],[size(stim.frames,1) 1]); ...
+    repmat([stim.graphs(1,3) stim.cols(3,:)],[size(stim.frames,1) 1]); ...
+    repmat([stim.graphs(1,4) stim.cols(4,:)],[size(stim.frames,1) 1])]];
+
+stim.mat =[[repmat(isi1.duration(1,1),[size(isi1.duration,1)*2*size(stim.frames,1) 1]); ...
+    repmat(isi1.duration(2,1),[size(isi1.duration,1)*2*size(stim.frames,1) 1])] ...
+    [repmat(stim.smallmat,[size(isi1.duration,1) 1])]];
+
+stim.mat2=[repmat(stim.mat,[size(pjvector,1) 1]) [repmat(pjvector(1,1),[size(stim.mat,1) 1]); repmat(pjvector(2,1),[size(stim.mat,1) 1])]];
+    
+%% PERMUTATIONS OF MATRICES
+exp2.stimuli=repmat(stim.mat2(randperm(size(stim.mat2,1)),:),[block.num 1]);
+
+%% JUDGMENT TEXT
+presence.rmsg = 'Y      N';
+col.rmsg='L    R';
+response.options = {'Y                    N'; 'N                    Y'};
+
+%% TASK VERSIONS & INSTRUCTIONS (1: pre-anchor instructions, 2: pre-experiment instructions)
+task.instructions.general='In this task, you will look at different visual graphemes. The graphemes will be \n \nfollowed by a patch of visual noise. Your job will be to judge whether you saw \n \nthe grapheme (Y/N) and which grapheme you saw(L/R). \n \n \n Please maintain your focus on the centre of the monitor at all times \n \nand pay very close attention to each stimulus.\n \n \nPlease click the mouse to go to the next screen.';
+task.instructions.orientationpractice='You will now get a chance to practice naming the grapheme that you saw\n \ngrating. After each grapheme is presented, judge which  \n \grapheme you saw. \n \n \nPlease click the mouse to begin.';
+task.instructions.threshold='In this part of the task, you will judge whether each grapheme is present or not. \n \n \n Pay very close attention and judge whether you thought it was present (Y) or not (N).\n \n \nIf you are unsure, just make your best guess. \n \n \nPlease click the mouse to begin.';
+task.instructions.main='Now you will begin the main experiment. Pay close attention to each \n \nstimulus and judge to the best of your ability whether you \n \nsaw the grapheme (Y/N) and its orientation (L/R). \n \n \nIf you are unsure, just make your best guess. \n \n \nOnce you are ready, please let the experimenter know.';
+blocks=0;
+task.instructions.betweenblocks=['Please take a moment to relax.\n \n \n Once you are ready, please let the experimenter know.'];
+
+%% GENERAL INSTRUCTIONS
+Screen('TextSize', w, 22);
+Screen('TextFont', w, 'Arial');
+DrawFormattedText(w, task.instructions.general,'center', 'center', WhiteIndex(w));       
+% flip instructions screen
+time2flip=0; resp.VBLTimestamp=Screen('Flip',w,time2flip);
+
+%% RESPONSE
+while(1)
+    [mouse.x,mouse.y,mouse.buttons] = GetMouse(w); mouse.time = GetSecs;
+    % check if mouse clicked on new position
+    if(mouse.buttons(1) || mouse.buttons(3) && mouse.x >= 0  && mouse.x <= width && mouse.y >= 0 && mouse.y <= height)
+        trld.mouse.press = mouse; break;
+    end
+end
+WaitSecs(.2)
+% 
+% if lumin==1
+% 
+%     %% CONTRAST THRESHOLD DETERMINATION PREPARATION
+%     startval=.9;
+%     step1=.1;
+%     step2=.05;
+%     step3=.01;
+%     xMin=0;
+%     xMax=1;
+%     stoprule=thresh.num;
+% 
+%     %% ORIGINAL STAIRCASE
+%     %UD = PAL_AMUD_setupUD;
+%     %UD=PAL_AMUD_setupUD(UD,'down',1,'stepSizeUp',step1,'stepSizeDown',step1,'stopRule',stoprule,'startValue',startval,'xMin',xMin,'stopCriterion','trials');
+% 
+%     %% RUNNING FIT METHOD
+%     alphas=.1:.01:.9;
+%     prior=PAL_pdfNormal(alphas,0,1);
+%     RF = PAL_AMRF_setupRF;
+%     RF=PAL_AMRF_setupRF(RF,'priorAlphaRange',alphas, 'stepSizeUp',step1,'stepSizeDown',step1,'beta', .75,'stopRule',stoprule,'startValue',startval,'xMin',xMin,'stopCriterion','trials','prior',prior);
+%     %UD,'down',1,'stepSizeUp',step1,'stepSizeDown',step1,'stopRule',stoprule,'startValue',startval,'xMin',xMin,'stopCriterion','trials');
+% 
+%     %% CONTRAST THRESHOLD ESTIMATION INSTRUCTIONS
+%     Screen('TextSize', w, 22);
+%     Screen('TextFont', w, 'Arial');
+%     DrawFormattedText(w, task.instructions.threshold,'center', 'center', WhiteIndex(w));       
+%     % flip instructions screen
+%     time2flip=0; resp.VBLTimestamp=Screen('Flip',w,time2flip);
+% 
+%     %% RESPONSE
+%     while(1)
+%         [mouse.x,mouse.y,mouse.buttons] = GetMouse(w); mouse.time = GetSecs;
+%         % check if mouse clicked on new position
+%         if(mouse.buttons(1) || mouse.buttons(3) && mouse.x >= 0  && mouse.x <= width && mouse.y >= 0 && mouse.y <= height)
+%             trld.mouse.press = mouse; break;
+%         end
+%     end
+% 
+%     %% CONTRAST THRESHOLD ESTIMATION
+%     threshold.trial=1;
+%     threshold.matrix=zeros(100,2);
+%     while ~RF.stop
+%         %while ~UD.stop
+%         aperture=Screen('OpenOffscreenwindow', w, 128, objRect);
+%         % which stim angle?
+%         sa=randperm(size(stim.angle,1));
+%         % which 
+%         ri=randperm(size(isi1.duration,1));
+% 
+%         %% ISI1 (blank screen)
+%         DrawFormattedText(w, '','center', 'center', WhiteIndex(w));
+%         time2flip=1; isi1.VBLTimestamp=Screen('Flip',w,time2flip);
+% 
+%         %% STIMULUS PREPARATION\        
+%         
+%         %% CHANGE THIS!!!
+%         % present grapheme / colour ... 
+% 
+% 
+%         DrawFormattedText(w, num2str(stim.graphs),'center', 'center', WhiteIndex(w)); 
+%         Screen('FillOval', aperture, stim.cols, objRect);
+%         
+%         
+%         
+%         Screen('DrawTexture', w, gabortex, [], [], stim.angle(sa(1)), [], [], [], [], kPsychDontDoRotation, [180-phase, freq, sc, RF.xCurrent, aspectratio, 0, 0, 0]); 
+%         Screen('DrawTexture', w, aperture, [], [], [], 0);
+%         Screen('BlendFunction', w, GL_ONE, GL_ZERO);
+%         Screen('DrawingFinished', w);
+% 
+%         %% CHANGE THIS!!!
+%         %time2flip=isi1.VBLTimestamp+(round(isi1.duration(randperm(size(isi1.duration,1),1))/ifi)-.5)*ifi; stims.VBLTimestamp=Screen('Flip', w,time2flip);
+%         time2flip=isi1.VBLTimestamp+(round(isi1.duration(ri(1))/ifi)-.5)*ifi; stims.VBLTimestamp=Screen('Flip', w,time2flip);
+% 
+%         %% MASK
+%         Screen('FillOval', aperture, [255 255 255 0], objRect);
+%         Screen('BlendFunction', w, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+%         Screen('DrawTexture', w, masktex, [], [], [], 0);
+%         Screen('DrawTexture', w, aperture, [], [], [], 0);
+%         % 4th option for drawtexture was dstRect(1,:)
+% 
+%         %time2flip=stims.VBLTimestamp+1; mask.VBLTimestamp=Screen('Flip', w,time2flip);
+%         % stimulus is presented for 2 frames
+%         time2flip=stims.VBLTimestamp+(2-.5)*ifi; mask.VBLTimestamp=Screen('Flip', w,time2flip);
+% 
+%         %% ISI2 (blank screen)
+%         DrawFormattedText(w, '','center', 'center', WhiteIndex(w));
+%         time2flip=mask.VBLTimestamp+(round(mask.duration/ifi)-.5)*ifi; isi2.VBLTimestamp=Screen('Flip',w,time2flip);
+%         % disable alpha blending
+%         Screen('BlendFunction', w, GL_ONE, GL_ZERO);
+% 
+%         %% PRESENCE (Y/N) JUDGMENT    
+%         Screen('TextSize', w, 32);
+%         DrawFormattedText(w, presence.rmsg, 'center', 'center', WhiteIndex(w));       
+%         time2flip=isi2.VBLTimestamp+(round(isi2.duration/ifi)-.5)*ifi; awarejudge.VBLTimestamp=Screen('Flip',w,time2flip);
+% 
+%         %% RESPONSE OUTPUT (judgment [1=Y, 2=N] and RT)
+%         t_ini = GetSecs();
+%         while(1)
+%             [mouse.x,mouse.y,mouse.buttons] = GetMouse(w); mouse.time1 = GetSecs;
+%             % check if mouse clicked on new position
+%             if(mouse.buttons(1) || mouse.buttons(3) && mouse.x >= 0  && mouse.x <= width && mouse.y >= 0 && mouse.y <= height)
+%                 trld.mouse.press = mouse; break;
+%             end
+%         end 
+%         % mouse responses
+%         % 1 0 0 = left
+%         % 0 1 0 = right
+%         m.response=find(mouse.buttons==1);
+%         trld.mouse.press = []; trld.mouse.release = [];
+%         mouse.x=-1; mouse.y=-1;
+% 
+%         %% BETWEEN-JUDGE FLIP
+%         DrawFormattedText(w, '','center', 'center', WhiteIndex(w));
+%         time2flip=mouse.time1+.2; betweenjudge.VBLTimestamp=Screen('Flip',w,time2flip);
+% 
+%         %% ADJUST THRESHOLD BASED ON PERFORMANCE
+%         % accuracy
+%         if m.response==1
+%             resp.acc=1;
+%         else if m.response==3
+%                 resp.acc=0;
+%             end
+%         end
+%         RF.xStaircase
+%         threshold.matrix(threshold.trial,:)=[RF.xCurrent resp.acc];
+%         %threshold.matrix(threshold.trial,:)=[UD.xCurrent resp.acc];
+% 
+%         % adaptive procedure
+%         RF=PAL_AMRF_updateRF(RF,RF.xCurrent, resp.acc);
+%         %UD=PAL_AMUD_updateUD(UD,resp.acc);
+% 
+%         % update stepsize
+%         %if UD.reversal(end)==3;
+%         %    UD=PAL_AMUD_setupUD(UD,'stepSizeUp',step2,'stepSizeDown',step2);
+%         %else if UD.reversal(end)<3;
+%         %    else if UD.reversal(end)>=6;
+%         %            UD=PAL_AMUD_setupUD(UD,'stepSizeUp',step3,'stepSizeDown',step3);
+%         %        end
+%         %    end
+%         %end
+%         threshold.trial=threshold.trial+1;
+%         % end at 10 reversals
+%         %if max(UD.reversal)>=12;
+%         %    UD.stop=1;
+%         %else if max(UD.reversal)<12;
+%         %    end
+%         %end
+%         
+%         %% CONTRAST THRESHOLD
+%         threshold_estimate=[RF.mean RF.sd RF.mode];
+%         save([num2str(id) '_' num2str(day.stamp) '_' num2str(time.stamp) '_threshold'],'threshold_estimate','-ASCII');
+%         threshold_matrix=threshold.matrix;
+%         save([num2str(id) '_' num2str(day.stamp) '_' num2str(time.stamp) '_threshold_matrix'],'threshold_matrix','-ASCII');
+% 
+%         contrast=RF.mean;
+%         
+%     end
+% else if lumin==0
+%         %% NEED TO CHANGE THIS!!!!!
+%         contrast=1;
+%     end
+% end
+contrast=1;
+
+%% PREPARE OUTPUTS
+output = zeros(size(exp2.stimuli,1),11);
+m.responses=zeros(trial.num,4);
+s.timings=zeros(trial.num,4);
+
+%% MAIN INSTRUCTIONS
+Screen('TextSize', w, 22);
+Screen('TextFont', w, 'Arial');
+DrawFormattedText(w, task.instructions.main,'center', 'center', WhiteIndex(w));       
+% flip instructions screen
+time2flip=0; resp.VBLTimestamp=Screen('Flip',w,time2flip);
+%% RESPONSE
+while(1)
+    [mouse.x,mouse.y,mouse.buttons] = GetMouse(w); mouse.time = GetSecs;
+    % check if mouse clicked on new position
+    if(mouse.buttons(1) || mouse.buttons(3) && mouse.x >= 0  && mouse.x <= width && mouse.y >= 0 && mouse.y <= height)
+        trld.mouse.press = mouse; break;
+    end
+end
+
+%% EXPERIMENTAL TRIALS
+% specify starting points for blocks
+block.trialstarts=1:trial.num:size(exp2.stimuli,1);
+for blocks = 1:block.num
+    % block of trials
+    block.stim = exp2.stimuli(block.trialstarts(blocks):block.trialstarts(blocks)+trial.num-1,:);
+
+    %% PRESENT BETWEEN-BLOCK INSTRUCTIONS
+    DrawFormattedText(w, '','center', 'center', WhiteIndex(w));
+    blockstart.VBLTimestamp=Screen('Flip',w,1);
+    DrawFormattedText(w, task.instructions.betweenblocks,'center', 'center', WhiteIndex(w));
+    time2flip=blockstart.VBLTimestamp+.25; pre_blockinstruct.VBLTimestamp=Screen('Flip',w,time2flip);
+    
+    %% RESPONSE
+    while(1)
+        [mouse.x,mouse.y,mouse.buttons] = GetMouse(w); mouse.time = GetSecs;
+        % check if mouse clicked on new position
+        if(mouse.buttons(1) || mouse.buttons(3) && mouse.x >= 0  && mouse.x <= width && mouse.y >= 0 && mouse.y <= height)
+            trld.mouse.press = mouse; break;
+        end
+    end
+    
+    %% TRIALS
+    for es=1:trial.num
+        aperture=Screen('OpenOffscreenwindow', w, 128, objRect);
+        % identiy no-stimulus trials
+        if isnan(block.stim(es,2))==1
+            trialcontrast=0;
+        else if isnan(block.stim(es,2))~=1
+                trialcontrast=contrast;
+            end
+        end
+        %if isnan(exp2.stimuli(es,2))==1;
+        %    trialcontrast=0;
+        %else if isnan(exp2.stimuli(es,2))~=1;
+        %        trialcontrast=contrast;
+        %    end
+        %end
+            
+        %% ISI1 (blank screen)
+        DrawFormattedText(w, '','center', 'center', WhiteIndex(w));
+        time2flip=1; isi1.VBLTimestamp=Screen('Flip',w,time2flip);
+        
+        %% STIMULUS PREPARATION 
+        if condition<=2
+            Screen('TextSize', w, 130);
+            Screen('TextFont', w, 'Arial');
+            DrawFormattedText(w, num2str(block.stim(es,3)),'center', 'center', BlackIndex(w),[rectsize]);
+        else if condition==3                
+                Screen('FillOval', w,block.stim(es,4:6), centeredRect, maxDiameter);
+               
+            end
+        end
+        %% PRESENT STIMULUS
+        time2flip=isi1.VBLTimestamp+(round(block.stim(es,1)/ifi)-.5)*ifi; stim.VBLTimestamp=Screen('Flip',w,time2flip);
+            
+        %% MASK 
+        Screen('FillOval', aperture, [255 255 255 0], objRect);
+        Screen('BlendFunction', w, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        Screen('DrawTexture', w, masktex, [], [], [], 0);
+        Screen('DrawTexture', w, aperture, [], [], [], 0);
+        % 4th option for drawtexture was dstRect(1,:)
+        
+        time2flip=stim.VBLTimestamp+(block.stim(es,2)-.5)*ifi; mask.VBLTimestamp=Screen('Flip', w,time2flip);
+        
+        %% ISI2 (blank screen)
+        DrawFormattedText(w, '','center', 'center', WhiteIndex(w));
+        time2flip=mask.VBLTimestamp+(round(mask.duration/ifi)-.5)*ifi; isi2.VBLTimestamp=Screen('Flip',w,time2flip);
+        
+        % disable alpha blending
+        Screen('BlendFunction', w, GL_ONE, GL_ZERO);
+        
+                  %% THIS IS THE YES OR NO QUESTION:
+        %% PRESENCE (Y/N) JUDGMENT          
+        Screen('TextSize', w, 32);
+        DrawFormattedText(w, presence.rmsg, 'center', 'center', WhiteIndex(w));       
+        time2flip=isi2.VBLTimestamp+(round(isi2.duration/ifi)-.5)*ifi; awarejudge.VBLTimestamp=Screen('Flip',w,time2flip);
+        
+        %% RESPONSE OUTPUT (judgment [1=Y, 2=N] and RT)
+        t_ini1 = GetSecs();
+        while(1)
+            [mouse.x,mouse.y,mouse.buttons] = GetMouse(w); mouse.time1 = GetSecs;
+            % check if mouse clicked on new position
+            if(mouse.buttons(1) || mouse.buttons(3) && mouse.x >= 0  && mouse.x <= width && mouse.y >= 0 && mouse.y <= height)
+                trld.mouse.press = mouse; break;
+            end
+        end 
+        % mouse responses
+        % 1 0 0 = left
+        % 0 1 0 = right
+        m.button.yn.judge=find(mouse.buttons==1);
+        if m.button.yn.judge==1;
+        else if m.button.yn.judge==3;
+                m.button.yn.judge=2;
+            end
+        end
+        m.responses(es,1:2)=[m.button.yn.judge mouse.time1-t_ini1];
+        trld.mouse.press = []; trld.mouse.release = [];
+        mouse.x=-1; mouse.y=-1;
+        
+        %% BETWEEN-JUDGE FLIP
+        DrawFormattedText(w, '','center', 'center', WhiteIndex(w));
+        time2flip=mouse.time1+.01; betweenjudge.VBLTimestamp=Screen('Flip',w,time2flip);
+        
+        %% ANGLE (L/R) JUDGMENT    
+        DrawFormattedText(w, presence.rmsg, 'center', 'center', WhiteIndex(w));       
+        time2flip=betweenjudge.VBLTimestamp+ifi; anglejudge.VBLTimestamp=Screen('Flip',w,time2flip);
+        
+        %% RESPONSE OUTPUT (judgment [1=L, 2=R] and RT)
+        [mouse.x0,mouse.y0,mouse.buttons0]=GetMouse;
+        while any(mouse.buttons0)
+            [mouse.x0,mouse.y0,mouse.buttons0]=GetMouse;
+        end
+        
+        t_ini2 = GetSecs();
+        while(1)
+            [mouse.x,mouse.y,mouse.buttons] = GetMouse(w); mouse.time2 = GetSecs;
+            % check if mouse clicked on new position
+            if(mouse.buttons(1) || mouse.buttons(3) && mouse.x >= 0 && mouse.x <= width && mouse.y >= 0 && mouse.y <= height)
+                trld.mouse.press = mouse; break;
+            end
+        end
+        
+        m.button.lr.judge=find(mouse.buttons==1);
+        if m.button.lr.judge==1;
+        else if m.button.lr.judge==3;
+                m.button.lr.judge=2;
+            end
+        end
+        
+        m.responses(es,3:4)=[m.button.lr.judge mouse.time2-t_ini2];
+        trld.mouse.press = []; trld.mouse.release = [];
+     
+                                          %% THIS IS THE CHOICE QUESTION(for colour):
+    %% RESPONSE 
+        Screen('FillOval', w, stim.cols(1,:),settings.box3.pos, [])
+        Screen('FillOval', w, stim.cols(2,:),settings.box4.pos, [])
+        Screen('FillOval', w, stim.cols(3,:),settings.box5.pos, [])
+        Screen('FillOval', w, stim.cols(4,:),settings.box6.pos, [])
+        % text
+%         Screen('TextSize',w,32);
+%         [nx, ny, textbounds] = DrawFormattedText(w, 'x y', 'center', 'center',[0 0 0]);%, settings.scale.labels.wrapat, 0, 0, settings.scale.labels.vSpacing, 0, settings.scale.labels.pos(1,:));
+        time2flip=isi2.VBLTimestamp+(round(isi2.duration/ifi)-.5)*ifi; awarejudge.VBLTimestamp=Screen('Flip',w,time2flip);
+        % set mouse position & show cursor
+        SetMouse(mouse.position.x, mouse.position.y,screenNumber);6
+        ShowCursor(settings.scale.cursor);
+        trld.mouse.press = []; trld.mouse.release = [];
+        t_ini = GetSecs();
+        while(1)
+            [mouse.x,mouse.y,mouse.buttons] = GetMouse(w); mouse.time1 = GetSecs;
+            % check if mouse clicked on new position
+             if(mouse.buttons(1) && mouse.x >= settings.box3.pos(1)  && mouse.x <= settings.box3.pos(3) && mouse.y >= settings.box3.pos(2) && mouse.y <= settings.box3.pos(4)) || ...
+                     (mouse.buttons(1) && mouse.x >= settings.box4.pos(1)  && mouse.x <= settings.box4.pos(3) && mouse.y >= settings.box4.pos(2) && mouse.y <= settings.box4.pos(4))
+                trld.mouse.press = mouse; break;
+            end
+        end
+        % wait for mouse release
+        while(1)
+            [mouse.x,mouse.y,mouse.buttons] = GetMouse(w); mouse.time2 = GetSecs;
+            if(~mouse.buttons(1)), break; end
+        end
+        HideCursor;
+
+        %% MOUSE RESPONSE DATA COLLECTION
+        % mouse responses
+        % 1 0 0 = left
+        % 0 1 0 = right (mac)
+        % 0 0 1 = right (PC)  
+        if mouse.x<=settings.box1.pos(3) && block.stim(es,7)==1
+            mouse.judge=1;
+        else if mouse.x<=settings.box1.pos(3) && block.stim(es,7)==2
+                mouse.judge=2;
+            else if mouse.x>=settings.box2.pos(1) && block.stim(es,7)==1
+                    mouse.judge=2;
+                else if mouse.x>=settings.box2.pos(1) && block.stim(es,7)==2
+                        mouse.judge=1;
+                    end
+                end
+            end
+        end
+
+        %% RESPONSE OUTPUT (judgment [1=Y, 2=N] and RT)
+        m.responses(es,1:2)=[mouse.judge mouse.time1-t_ini];
+        trld.mouse.press = []; trld.mouse.release = [];
+
+%         %% STIMULUS JUDGMENT
+%         
+%         if task == 1        
+%             % boxes   
+%             Screen('FillOval', w, WhiteIndex(w),settings.box3.pos, [])
+%             Screen('FillOval', w, WhiteIndex(w),settings.box4.pos, [])
+%             Screen('FillOval', w, WhiteIndex(w),settings.box5.pos, [])
+%             Screen('FillOval', w, WhiteIndex(w),settings.box6.pos, [])
+%             % text
+%             Screen('TextSize',w,32);
+%             [nx, ny, textbounds] = DrawFormattedText(w, num2str(stim.graphs(1)), settings.scale.confidence.pos(1,1), settings.scale.confidence.pos(1,2),[0 0 0]);
+%             [nx, ny, textbounds] = DrawFormattedText(w, num2str(stim.graphs(2)), settings.scale.confidence.pos(2,1), settings.scale.confidence.pos(2,2),[0 0 0]);
+%             [nx, ny, textbounds] = DrawFormattedText(w, num2str(stim.graphs(3)), settings.scale.confidence.pos(3,1), settings.scale.confidence.pos(3,2),[0 0 0]);
+%             [nx, ny, textbounds] = DrawFormattedText(w, num2str(stim.graphs(4)), settings.scale.confidence.pos(4,1), settings.scale.confidence.pos(4,2),[0 0 0]);
+%             
+%         else if task == 2
+%             % boxes   
+%             Screen('FillOval', w, WhiteIndex(w),settings.box3.pos, [])
+%             Screen('FillOval', w, WhiteIndex(w),settings.box4.pos, [])
+%             Screen('FillOval', w, WhiteIndex(w),settings.box5.pos, [])
+%             Screen('FillOval', w, WhiteIndex(w),settings.box6.pos, [])
+%             end
+%         end
+        %flip screen
+        time2flip=mouse.time2+ifi; stimjudge.VBLTimestamp=Screen('Flip',w,time2flip);
+
+        % set mouse position & show cursor
+        SetMouse(mouse.position.x, mouse.position.y,screenNumber);
+        ShowCursor(settings.scale.cursor);
+        trld.mouse.press = []; trld.mouse.release = [];
+        t_ini = GetSecs();
+        while(1)
+            [mouse.x,mouse.y,mouse.buttons] = GetMouse(w); mouse.time3 = GetSecs;
+            % check if mouse clicked on new position
+             if(mouse.buttons(1) && mouse.x >= settings.box3.pos(1)  && mouse.x <= settings.box3.pos(3) && mouse.y >= settings.box3.pos(2) && mouse.y <= settings.box3.pos(4)) || ...
+                     (mouse.buttons(1) && mouse.x >= settings.box4.pos(1)  && mouse.x <= settings.box4.pos(3) && mouse.y >= settings.box4.pos(2) && mouse.y <= settings.box4.pos(4)) || ...
+                     (mouse.buttons(1) && mouse.x >= settings.box5.pos(1)  && mouse.x <= settings.box5.pos(3) && mouse.y >= settings.box5.pos(2) && mouse.y <= settings.box5.pos(4)) || ...
+                     (mouse.buttons(1) && mouse.x >= settings.box6.pos(1)  && mouse.x <= settings.box6.pos(3) && mouse.y >= settings.box6.pos(2) && mouse.y <= settings.box6.pos(4))
+                trld.mouse.press = mouse; break;
+            end
+        end
+        % wait for mouse release
+        while(1)
+            [mouse.x,mouse.y,mouse.buttons] = GetMouse(w); mouse.time4 = GetSecs;
+            if(~mouse.buttons(1)), break; end
+        end
+        HideCursor;
+
+        %% MOUSE RESPONSE DATA COLLECTION
+        % mouse responses
+        % 1 0 0 = left
+        % 0 1 0 = right (mac)
+        % 0 0 1 = right (PC)    
+        if mouse.x<=settings.box3.pos(3) && mouse.y<=settings.box3.pos(4)
+            mouse.judge2=stim.graphs(1);
+        else if mouse.x>=settings.box5.pos(1) && mouse.y<=settings.box5.pos(4)
+                mouse.judge2=stim.graphs(2);
+            else if mouse.x>=settings.box6.pos(1) && mouse.y>=settings.box6.pos(2)
+                    mouse.judge2=stim.graphs(3);
+                else if mouse.x<=settings.box4.pos(3) && mouse.y>=settings.box4.pos(2)
+                        mouse.judge2=stim.graphs(4);
+                    end
+                end
+            end
+        end
+        m.responses(es,3:4)=[mouse.judge2 mouse.time3-t_ini];
+        
+        HideCursor;
+               
+        %% STIMULI TIMING FOR OUTPUT
+        % 1- isi1 duration, 2 -stimulus duration, 3- mask duration, 4- isi2 duration
+        s.timings(es,1:4)=[stim.VBLTimestamp-isi1.VBLTimestamp ... % isi
+            mask.VBLTimestamp-stim.VBLTimestamp ... % stim
+            isi2.VBLTimestamp-mask.VBLTimestamp ... % mask
+            awarejudge.VBLTimestamp-isi2.VBLTimestamp];
+    end
+    %% BLOCK NUMBER UPDDATING
+    % update block number & instructions
+    task.instructions.betweenblocks=['Please take a moment to relax.\n \n \n You have ' num2str(block.num-blocks) ' blocks left. \n \n \n Once you are ready, please let the experimenter know.'];
+    
+    %% SAVE OUTPUT AFTER EACH BLOCK
+    % response output: 1-ISI, 2-#frames, 3- stimulus, 4-6-RGB,
+    % 7- Y/N prompt (left/right), 
+    % 8-Y/N (presence) judgment, 9-judgment RT, 10-stimulus judgment, 11-judgment RT,
+    % 12-isi1 duration, 13-stimulus duration, 14-mask duration, 15-isi2
+    % duration (OBJECTIVE DURATIONS)
+    output(block.trialstarts(blocks):(block.trialstarts(blocks)+trial.num-1),:)=[exp2.stimuli(block.trialstarts(blocks):(block.trialstarts(blocks)+trial.num-1),1:3) m.responses s.timings];
+    save([num2str(id) '_' num2str(day.stamp) '_' num2str(time.stamp)],'output','-ASCII');
+    m.responses=zeros(trial.num,4);
+    s.timings=zeros(trial.num,4);
+end
+
+%% END experiment
+Screen('CloseAll');
+clear Screen
+ShowCursor;
+fclose('all');
+Priority(0);
